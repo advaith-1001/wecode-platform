@@ -1,0 +1,31 @@
+services:
+  # The Redis instance for queuing and state
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379" # Expose for local debugging if needed
+
+  
+  spring-boot-app:
+    build: ./wecode-backend 
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    environment:
+      - SPRING_REDIS_HOST=redis
+
+ 
+  worker:
+    build: ./worker
+    depends_on:
+      - redis
+
+    environment:
+      - HOST_TMP_DIR=${PWD}/worker-tmp
+    volumes:
+      # This is the shared volume for the files
+      - ./worker-tmp:/worker-tmp 
+      # This allows the worker to control the host's Docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock
+      
