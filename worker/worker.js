@@ -117,13 +117,26 @@ async function processJob(jobString) {
             output += chunk.toString('utf8');
         });
 
-        await container.wait({ timeout: 30000 });
+        const waitResponse = await container.wait({ timeout: 30000 });
+        const exitCode = waitResponse.StatusCode;
+        
+        console.log(`Job ${jobId} completed with exit code ${exitCode}.`);
 
-        console.log(`Job ${jobId} completed.`);
-        await redisClient.hSet(`job:${jobId}`, {
-            status: 'completed',
-            output: output,
-        });
+        finalOutput = cleanOutput(output);
+
+        if (exitCode === 0) {
+            await redisClient.hSet(`job:${jobId}`, {
+                status: 'completed',
+                output: finalOutput,
+            });
+        } else {
+            // If exitCode is not 0, it's an error.
+            // The 'output' variable already contains the error message from stderr.
+            await redisClient.hSet(`job:${jobId}`, {
+                status: 'error',
+                output: finalOutput,
+            });
+        }
 
     } catch (err) {
         console.error(`Error processing job ${jobId}:`, err);
@@ -162,3 +175,17 @@ async function startWorker() {
 }
 
 startWorker();
+
+function cleanOutput(output) {
+    // Remove ANSI escape codes (like \u001b[31m for red text)
+    return output.replace(
+        // matches ANSI escape sequences
+        /\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])/g,
+        ''
+    ).replace(
+        // remove other non-printable control characters
+        /[\x00-\x1F\x7F-\x9F]/g,
+        ''
+    ).trim();
+}
+
