@@ -4,28 +4,34 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379" # Expose for local debugging if needed
+    # ✅ This section tells Docker to wait until Redis is truly ready
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  
   spring-boot-app:
-    build: ./wecode-backend 
+    build: ./wecode-springboot-backend
     ports:
       - "8080:8080"
+    # ✅ This now waits for the healthcheck to pass before starting
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     environment:
       - SPRING_REDIS_HOST=redis
 
- 
   worker:
     build: ./worker
-    depends_on: 
-      - redis
-
+    # ✅ This also waits for the healthcheck to pass
+    depends_on:
+      redis:
+        condition: service_healthy
     environment:
       - HOST_TMP_DIR=${PWD}/worker-tmp
     volumes:
       # This is the shared volume for the files
-      - ./worker-tmp:/worker-tmp 
+      - ./worker-tmp:/worker-tmp
       # This allows the worker to control the host's Docker daemon
       - /var/run/docker.sock:/var/run/docker.sock
-      
