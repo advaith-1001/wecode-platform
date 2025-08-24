@@ -32,24 +32,46 @@ Frontend Repo: [React Frontend Repo](https://github.com/advaith-1001/wecode)
 
 The backend consists of three core services running in Docker containers, orchestrated by Docker Compose.
 
-+------------------+      +------------------------+      +-------------------+
-|      Client      |----->| Spring Boot App (API)  |<---->|       Redis       |
-| (React Frontend) |      | (WebSocket Gateway)    |      | (Queue & Storage) |
-+------------------+      +------------------------+      +-------------------+
-       ^     |                       |                           ^
-       |     | WebSocket Sync        |                           | Job Queue
-       |     |                       |                           |
-       +-----+                       |                      +----v----+
-                                     |                      | Node.js |
-                                     +--------------------->| Worker  |
-                                      (Docker Socket Mount) +---------+
-                                                               |
-                                                               | Controls
-                                                               v
-                                                      +---------------------+
-                                                      | Ephemeral Docker    |
-                                                      | Execution Container |
-                                                      +---------------------+
+Of course, my apologies. Text-based diagrams can be tricky, as they rely on monospaced fonts and correct formatting to align properly.
+
+Here is a revised and more robust version of the architecture diagram, formatted correctly inside a code block. This layout is narrower and should be less prone to display issues.
+
+-----
+
+### \#\# System Architecture 🏗️
+
+```
+  [ Client Browser ]
+         |
+         | HTTP API Call (/api/run)
+         | WebSocket Sync (/ws)
+         v
++------------------------+
+| Spring Boot App        |
+| (API & WS Gateway)     |
++------------------------+
+         |                ^
+         | (LPUSH job)    | (HGET results)
+         |                |
+         v                |
++------------------------+
+| Redis                  |
+| (Queue & Job Store)    |
++------------------------+
+         |
+         | (BRPOP job)
+         v
++------------------------+
+| Node.js Worker         |---+
++------------------------+   |
+                             | (Controls Host Docker Daemon)
+                             | via /var/run/docker.sock
+                             v
+                     +-------------------+
+                     | Ephemeral Docker  |
+                     | (Code Sandbox)    |
+                     +-------------------+
+```
 
 ### ### Workflow 1: Real-Time Collaboration
 
