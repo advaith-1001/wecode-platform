@@ -106,7 +106,7 @@ Here is a revised and more robust version of the architecture diagram, formatted
 
 1.  **Clone the repository:**
     ```sh
-    git clone [https://github.com/your-username/your-backend-repo.git](https://github.com/your-username/your-backend-repo.git)
+    git clone [https://github.com/advaith-1001/wecode-platform](https://github.com/advaith-1001/wecode-platform)
     cd your-backend-repo
     ```
 
