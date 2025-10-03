@@ -32,13 +32,6 @@ Frontend Repo: [React Frontend Repo](https://github.com/advaith-1001/wecode)
 
 The backend consists of three core services running in Docker containers, orchestrated by Docker Compose.
 
-Of course, my apologies. Text-based diagrams can be tricky, as they rely on monospaced fonts and correct formatting to align properly.
-
-Here is a revised and more robust version of the architecture diagram, formatted correctly inside a code block. This layout is narrower and should be less prone to display issues.
-
------
-
-### \#\# System Architecture 🏗️
 
 ```
   [ Client Browser ]
